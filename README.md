@@ -1,39 +1,45 @@
-# 🧠 Explainable Deep Learning – Grad-CAM Analysis on CIFAR-10
+# Explainable Deep Learning – Grad-CAM on CIFAR-10
 
-This repository contains the implementation and analysis for an explainability experiment using Grad-CAM and its variants (Grad-CAM++ and Score-CAM) applied to a pretrained ResNet-50 model. The goal of this project is to understand how deep learning models interpret visual cues related to transportation and mobility while testing their robustness on low-resolution images. This project explores how pretrained computer vision models, originally trained on high-quality ImageNet data, interpret and focus on relevant visual regions when exposed to low-resolution images from the CIFAR-10 dataset. Using Grad-CAM visualizations, we analyze how model attention shifts across different classes and how interpretability reveals model reasoning even when predictions are inaccurate.
+This project applies **Grad-CAM**, **Grad-CAM++**, and **Score-CAM** to a pretrained **ResNet-50** model to visualize how deep learning models interpret images from the **CIFAR-10** dataset. The goal is to understand which regions the model focuses on when making predictions for different forms of **transportation and movement**, including airplanes, automobiles, ships, trucks, and horses.
 
-The main objective is to examine how ResNet-50 focuses on image regions associated with airplanes, automobiles, ships, trucks, and horses, all representing different forms of transportation and movement. By comparing Grad-CAM variants, the experiment highlights how explainability techniques differ in sensitivity and localization, offering insights into model stability under domain shift.
+## Overview
+The experiment investigates model explainability on low-resolution images, exploring how a network trained on high-quality ImageNet data performs under constrained visual conditions. By analyzing Grad-CAM heatmaps, the project highlights how attention varies across classes and methods, even when predictions are imperfect.
 
-The CIFAR-10 dataset contains 60,000 low-resolution (32×32) color images across 10 classes. The classes used in this experiment include airplane, automobile, ship, truck, and horse. CIFAR-10 simulates realistic low-quality conditions such as blurry or compressed traffic footage, making it a strong proxy for testing explainability under imperfect visual inputs.
+## Dataset
+**CIFAR-10** contains 60,000 color images (32×32) across 10 classes.  
+Classes used: `airplane`, `automobile`, `ship`, `truck`, `horse`.  
+This dataset simulates real-world conditions such as blurry or compressed footage, making it ideal for studying model interpretability under domain shift.
 
-**Dataset citation:**  
-Krizhevsky, A. (2009). *Learning Multiple Layers of Features from Tiny Images (CIFAR-10).* University of Toronto. [https://www.cs.toronto.edu/~kriz/cifar.html](https://www.cs.toronto.edu/~kriz/cifar.html)
+**Citation:**  
+Krizhevsky, A. (2009). *Learning Multiple Layers of Features from Tiny Images (CIFAR-10).* University of Toronto.  
+[https://www.cs.toronto.edu/~kriz/cifar.html](https://www.cs.toronto.edu/~kriz/cifar.html)
 
-The model used is a pretrained ResNet-50 from Torchvision, trained on the ImageNet-1K dataset. This model is used without fine-tuning to evaluate how well it generalizes to lower-resolution images and different data distributions. Images were normalized with the ImageNet mean and standard deviation values:
+## Model
+A pretrained **ResNet-50** from Torchvision (trained on ImageNet-1K) was used without fine-tuning.  
+Images were normalized using ImageNet statistics to match the model’s expected input:
+**Citation:**  
+He, K., Zhang, X., Ren, S., & Sun, J. (2016). *Deep Residual Learning for Image Recognition.* CVPR.  
+[https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html](https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html)
 
-`mean = [0.485, 0.456, 0.406]`  
-`std  = [0.229, 0.224, 0.225]`
+## Results Summary
+- **Airplane:** Misclassified as “can opener,” but CAMs correctly focused on the airplane body.  
+- **Automobile:** Classified as “moving van,” with strong attention on the wheels.  
+- **Ship:** Correctly identified, with Grad-CAM highlighting the base and Score-CAM the full body.  
+- **Truck:** Grad-CAM focused on headlights and doors; Score-CAM on the opposite side.  
+- **Horse:** Grad-CAM variants emphasized legs; Score-CAM captured the full body.
 
-These values ensure that inputs match the scale and distribution expected by ResNet-50, which was trained on ImageNet.
+Despite misclassifications, all methods consistently highlighted semantically meaningful regions, showing that explainability tools can still reveal logical model focus areas.
 
-**Model citation:**  
-He, K., Zhang, X., Ren, S., & Sun, J. (2016). *Deep Residual Learning for Image Recognition.* In *Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 770–778. [https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html](https://pytorch.org/vision/stable/models/generated/torchvision.models.resnet50.html)
+## Key Insight
+Grad-CAM visualizations confirmed that model reasoning can remain stable even when predictions are incorrect. This demonstrates the importance of explainability in domains such as **autonomous driving**, **mobility perception**, and **computer vision safety**.
 
-The experiment followed four main steps. First, the CIFAR-10 test set was loaded with ImageNet normalization, and images were resized from 32×32 to 224×224 to match ResNet-50’s input requirements. Second, pretrained ResNet-50 was used to predict each selected image class, logging both CIFAR-10 ground truth and predicted ImageNet labels. Third, Grad-CAM, Grad-CAM++, and Score-CAM were implemented using the model’s last convolutional layer to visualize model attention maps overlayed on the original images. Finally, results were compared across five representative samples: an airplane (predicted as “can opener”), an automobile (predicted as “moving van”), a ship (correctly classified), a truck (predicted as “moving van”), and a horse (predicted as “packet”). These comparisons revealed differences in how each CAM variant highlights visual features.
-
-The airplane image was misclassified as “can opener,” but Grad-CAM still correctly highlighted the airplane’s body, showing reliable attention despite the incorrect label. The automobile was identified as a “moving van,” which is semantically reasonable within the same category, and its wheels were consistently emphasized across all three methods. The ship was correctly identified; Grad-CAM and Grad-CAM++ focused on the base and back of the ship, while Score-CAM emphasized the entire body. For the truck, Grad-CAM and Grad-CAM++ highlighted the headlights and door, whereas Score-CAM focused on the opposite side of the vehicle. Finally, the horse image showed that Grad-CAM and Grad-CAM++ concentrated on the legs and part of the body, while Score-CAM highlighted the entire horse but still resulted in a “packet” prediction.
-
-Even when predictions were incorrect, Grad-CAM heatmaps aligned with meaningful regions of interest. Score-CAM produced broader, smoother attention maps, while Grad-CAM++ refined specific activation areas. The experiment demonstrates that explainability methods remain valuable in understanding model reasoning under imperfect conditions.
-
-Even when ResNet-50 misclassified low-resolution CIFAR-10 images, Grad-CAM and its variants consistently provided interpretable attention maps. Explainability revealed the model’s focus on meaningful features such as object shapes and key parts (wings, wheels, or body outlines), demonstrating that visual reasoning can remain stable even when final classifications are off. This project highlights the importance of explainability in computer vision applications, especially in safety-critical domains such as autonomous driving and transportation monitoring.
-
-**How to Run:**  
-1. Open the notebook directly in Google Colab using the link included in this repository.  
+## How to Run
+1. Open the notebook in Google Colab.  
 2. Install dependencies:  
-3. Run all notebook cells in order.  
-4. Grad-CAM visualizations will appear for the five selected CIFAR-10 images.
+3. Run all cells in order.  
+4. Visualizations for the five selected images will appear automatically.
 
-**References:**  
+## References
 - Krizhevsky, A. (2009). *Learning Multiple Layers of Features from Tiny Images (CIFAR-10).* University of Toronto.  
 - He, K., Zhang, X., Ren, S., & Sun, J. (2016). *Deep Residual Learning for Image Recognition.* CVPR.  
 - Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D., & Batra, D. (2017). *Grad-CAM: Visual Explanations from Deep Networks via Gradient-Based Localization.* ICCV.
@@ -42,3 +48,4 @@ Even when ResNet-50 misclassified low-resolution CIFAR-10 images, Grad-CAM and i
 **Course:** AIPI 590 – Explainable Deep Learning  
 **Institution:** Duke University, Pratt School of Engineering  
 **Created in:** Google Colab  
+**Repository:** [https://github.com/TiffanyDegbotse/Explainable-Deep-Learning](https://github.com/TiffanyDegbotse/Explainable-Deep-Learning)
